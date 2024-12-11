@@ -3,15 +3,14 @@ package com.spring.dozen.hub.domain.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.UuidGenerator;
 
 import java.util.UUID;
 
+@Entity
+@Getter
+@Builder(access = AccessLevel.PRIVATE)
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder(access = AccessLevel.PRIVATE)
-@Getter
-@Entity
 @Table(name = "p_hub")
 public class Hub {
     @Id
@@ -37,5 +36,21 @@ public class Hub {
 
     @Column(name = "is_deleted")
     private boolean isDeleted;
+
+    public static Hub create(Long userId,
+                             UUID centralHubId,
+                             String address,
+                             Double locationX,
+                             Double locationY) {
+        Hub hub = Hub.builder()
+                .userId(userId)
+                .centralHubId(centralHubId)
+                .address(address)
+                .locationX(locationX)
+                .locationY(locationY)
+                .build();
+        return hub;
+    }
+
 
 }
