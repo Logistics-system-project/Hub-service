@@ -12,7 +12,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "p_hub")
-public class Hub {
+public class Hub extends BaseEntity {
     @Id
     @GeneratedValue(generator = "uuid2")
     @GenericGenerator(name = "uuid2", strategy = "uuid2")
@@ -51,6 +51,4 @@ public class Hub {
                 .build();
         return hub;
     }
-
-
 }

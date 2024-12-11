@@ -39,7 +39,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	runtimeOnly 'com.mysql:mysql-connector-j'
 
-	implementation 'io.github.cdimascio:spring-dotenv:2.5.4'
+	implementation 'org.json:json:20210307'
 }
 
 dependencyManagement {

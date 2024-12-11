@@ -5,15 +5,11 @@ import java.util.UUID;
 public record HubDto(
         Long userId,
         UUID centralHubId,
-        String address,
-        Double locationX,
-        Double locationY
+        String address
 ) {
     public static HubDto of(Long userId,
                             UUID centralHubId,
-                            String address,
-                            Double locationX,
-                            Double locationY) {
-        return new HubDto(userId, centralHubId, address, locationX, locationY);
+                            String address) {
+        return new HubDto(userId, centralHubId, address);
     }
 }
