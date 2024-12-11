@@ -28,10 +28,10 @@ public class Hub extends BaseEntity {
     @Column(name = "address", nullable = false)
     private String address;
 
-    @Column(name = "location_x", columnDefinition = "DECIMAL(10,8)", nullable = false)
+    @Column(name = "location_x", columnDefinition = "DECIMAL(12,8)", nullable = false)
     private Double locationX;
 
-    @Column(name = "location_y", columnDefinition = "DECIMAL(10,8)", nullable = false)
+    @Column(name = "location_y", columnDefinition = "DECIMAL(12,8)", nullable = false)
     private Double locationY;
 
     @Column(name = "is_deleted")

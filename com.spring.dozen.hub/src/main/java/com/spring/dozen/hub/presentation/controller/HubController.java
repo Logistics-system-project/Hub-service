@@ -27,4 +27,10 @@ public class HubController {
         return ApiResponseDto.success(response);
     }
 
+    // 허브 목록 조회
+
+
+
+    // 허브 상세 조회
+
 }
