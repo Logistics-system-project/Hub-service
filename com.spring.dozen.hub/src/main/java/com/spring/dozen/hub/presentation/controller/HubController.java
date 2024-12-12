@@ -1,5 +1,6 @@
 package com.spring.dozen.hub.presentation.controller;
 
+import com.spring.dozen.hub.application.dto.response.HubDetailResponseDto;
 import com.spring.dozen.hub.application.dto.response.HubListResponseDto;
 import com.spring.dozen.hub.application.dto.response.HubResponseDto;
 import com.spring.dozen.hub.application.service.HubService;
@@ -13,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -48,6 +50,10 @@ public class HubController {
     }
 
     // 허브 상세 조회
-
+    @GetMapping("/{hudId}")
+    public ApiResponseDto <HubDetailResponseDto> getHubDetail(@PathVariable UUID hubId) {
+        HubDetailResponseDto response = hubService.getHubDetail(hubId);
+        return ApiResponseDto.success(response);
+    }
 
 }

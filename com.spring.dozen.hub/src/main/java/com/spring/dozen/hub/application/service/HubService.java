@@ -1,8 +1,11 @@
 package com.spring.dozen.hub.application.service;
 
 import com.spring.dozen.hub.application.dto.HubDto;
+import com.spring.dozen.hub.application.dto.response.HubDetailResponseDto;
 import com.spring.dozen.hub.application.dto.response.HubListResponseDto;
 import com.spring.dozen.hub.application.dto.response.HubResponseDto;
+import com.spring.dozen.hub.application.exception.ErrorCode;
+import com.spring.dozen.hub.application.exception.HubException;
 import com.spring.dozen.hub.domain.entity.Hub;
 import com.spring.dozen.hub.domain.repository.HubRepository;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +15,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -52,6 +57,14 @@ public class HubService {
         Page<Hub> hubPage = hubRepository.findByKeyword(keyword, pageable);
 
         return hubPage.map(HubListResponseDto::from);
+    }
+
+    // 허브 상세 조회
+    @Transactional
+    public HubDetailResponseDto getHubDetail(UUID hubId){
+        Hub hub = hubRepository.findByHubId(hubId)
+                .orElseThrow(() -> new HubException(ErrorCode.NOT_FOUND_HUB));
+        return HubDetailResponseDto.from(hub);
     }
 
 
