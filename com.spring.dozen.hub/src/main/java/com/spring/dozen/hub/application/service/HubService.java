@@ -15,7 +15,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -65,7 +68,7 @@ public class HubService {
     // 허브 상세 조회
     @Transactional
     public HubDetailResponse getHubDetail(UUID hubId){
-        Hub hub = hubRepository.findByHubId(hubId)
+        Hub hub = hubRepository.findByHubIdAndIsDeletedFalse(hubId)
                 .orElseThrow(() -> new HubException(ErrorCode.NOT_FOUND_HUB));
         return HubDetailResponse.from(hub);
     }
@@ -74,7 +77,7 @@ public class HubService {
     @Transactional
     public HubDetailResponse updateHub(UUID hubId,HubDto request){
         // 해당 허브
-        Hub hub = hubRepository.findByHubId(hubId)
+        Hub hub = hubRepository.findByHubIdAndIsDeletedFalse(hubId)
                 .orElseThrow(() -> new HubException(ErrorCode.NOT_FOUND_HUB));
 
         // 유저값 확인
@@ -87,7 +90,7 @@ public class HubService {
         // 중앙허브값 확인
         if (request.centralHubId() != null) {
             // 중앙 허브 유효성 검증
-            hubRepository.findByHubId(request.centralHubId())
+            hubRepository.findByHubIdAndIsDeletedFalse(request.centralHubId())
                     .orElseThrow(() -> new HubException(ErrorCode.NOT_FOUND_HUB));
             hub.setCentralHubId(request.centralHubId());
         }
@@ -102,4 +105,19 @@ public class HubService {
 
         return HubDetailResponse.from(hub);
     }
+
+    // 허브 삭제
+    @Transactional
+    public void deleteHub(UUID hubId) {
+        // 해당 허브
+        Hub hub = hubRepository.findByHubIdAndIsDeletedFalse(hubId)
+                .orElseThrow(() -> new HubException(ErrorCode.NOT_FOUND_HUB));
+
+        hub.deleteHud(true);
+
+        hub.setDeletedAt(LocalDateTime.now());
+        //hub.setDeletedBy("SystemAdmin");
+    }
+
+
 }

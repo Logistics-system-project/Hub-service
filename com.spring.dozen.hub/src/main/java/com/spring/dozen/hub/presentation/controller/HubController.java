@@ -61,4 +61,13 @@ public class HubController {
         return ApiResponse.success(response);
     }
 
+    // 허브 삭제
+    @DeleteMapping("/{hubId}")
+    public ApiResponse<Void> deleteHub(
+            @PathVariable UUID hubId
+    ){
+        hubService.deleteHub(hubId);
+        return ApiResponse.success();
+    }
+
 }

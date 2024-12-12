@@ -53,4 +53,10 @@ public class Hub extends BaseEntity {
                 .build();
         return hub;
     }
+
+
+
+    public void deleteHud(boolean isDeleted) {
+        this.isDeleted = isDeleted;
+    }
 }
