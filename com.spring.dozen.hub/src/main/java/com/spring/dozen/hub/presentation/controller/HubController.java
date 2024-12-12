@@ -1,16 +1,18 @@
 package com.spring.dozen.hub.presentation.controller;
 
+import com.spring.dozen.hub.application.dto.response.HubListResponseDto;
 import com.spring.dozen.hub.application.dto.response.HubResponseDto;
 import com.spring.dozen.hub.application.service.HubService;
 import com.spring.dozen.hub.presentation.dto.ApiResponseDto;
 import com.spring.dozen.hub.presentation.dto.HubRequestDto;
+import com.spring.dozen.hub.presentation.dto.PageResponseDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -28,9 +30,24 @@ public class HubController {
     }
 
     // 허브 목록 조회
+    @GetMapping
+    public PageResponseDto<HubListResponseDto> getHubList(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "false") boolean isAsc,
+            @RequestParam(required = false) String keyword
+    ){
+        Page<HubListResponseDto> hubPage = hubService.getHubList(page-1, size, sortBy, isAsc, keyword);
 
-
+        return PageResponseDto.success(
+                hubPage.getTotalPages(),
+                hubPage.getNumber(),
+                hubPage.getContent()
+        );
+    }
 
     // 허브 상세 조회
+
 
 }
