@@ -1,9 +1,9 @@
 package com.spring.dozen.hub.application.service;
 
 import com.spring.dozen.hub.application.dto.HubDto;
-import com.spring.dozen.hub.application.dto.response.HubDetailResponseDto;
-import com.spring.dozen.hub.application.dto.response.HubListResponseDto;
-import com.spring.dozen.hub.application.dto.response.HubResponseDto;
+import com.spring.dozen.hub.application.dto.response.HubDetailResponse;
+import com.spring.dozen.hub.application.dto.response.HubListResponse;
+import com.spring.dozen.hub.application.dto.response.HubResponse;
 import com.spring.dozen.hub.application.exception.ErrorCode;
 import com.spring.dozen.hub.application.exception.HubException;
 import com.spring.dozen.hub.domain.entity.Hub;
@@ -27,7 +27,8 @@ public class HubService {
 
     // 허브 생성
     @Transactional
-    public HubResponseDto createHub(HubDto request){
+    public HubResponse createHub(HubDto request){
+        // 유저 확인
 
         // 주소로 위도, 경도 찾기
         double[] coordinates = addressToCoordinateService.getCoordinates(request.address());
@@ -45,12 +46,12 @@ public class HubService {
         );
         hubRepository.save(hub);
 
-        return HubResponseDto.from(hub);
+        return HubResponse.from(hub);
     }
 
     // 허브 목록 조회
     @Transactional
-    public Page<HubListResponseDto> getHubList(int page, int size, String sortBy, boolean isAsc, String keyword){
+    public Page<HubListResponse> getHubList(int page, int size, String sortBy, boolean isAsc, String keyword){
         size = (size == 10 || size == 30 || size == 50) ? size : 10;
         Sort.Direction direction = isAsc ? Sort.Direction.ASC : Sort.Direction.DESC;
         Sort sort = Sort.by(direction, sortBy.equals("updated_at") ? "updated_at" : "created_at");
@@ -58,17 +59,47 @@ public class HubService {
 
         Page<Hub> hubPage = hubRepository.findByKeyword(keyword, pageable);
 
-        return hubPage.map(HubListResponseDto::from);
+        return hubPage.map(HubListResponse::from);
     }
 
     // 허브 상세 조회
     @Transactional
-    public HubDetailResponseDto getHubDetail(UUID hubId){
+    public HubDetailResponse getHubDetail(UUID hubId){
         Hub hub = hubRepository.findByHubId(hubId)
                 .orElseThrow(() -> new HubException(ErrorCode.NOT_FOUND_HUB));
-        return HubDetailResponseDto.from(hub);
+        return HubDetailResponse.from(hub);
     }
 
+    // 허브 수정
+    @Transactional
+    public HubDetailResponse updateHub(UUID hubId,HubDto request){
+        // 해당 허브
+        Hub hub = hubRepository.findByHubId(hubId)
+                .orElseThrow(() -> new HubException(ErrorCode.NOT_FOUND_HUB));
 
+        // 유저값 확인
+        if (request.userId() != null) {
+            // 유저 유효성 검증
 
+            hub.setUserId(request.userId());
+        }
+
+        // 중앙허브값 확인
+        if (request.centralHubId() != null) {
+            // 중앙 허브 유효성 검증
+            hubRepository.findByHubId(request.centralHubId())
+                    .orElseThrow(() -> new HubException(ErrorCode.NOT_FOUND_HUB));
+            hub.setCentralHubId(request.centralHubId());
+        }
+
+        // 주소값
+        if (request.address() != null && !request.address().isEmpty()) {
+            double[] coordinates = addressToCoordinateService.getCoordinates(request.address());
+            hub.setAddress(request.address());
+            hub.setLocationX(coordinates[1]); // 경도
+            hub.setLocationY(coordinates[0]); // 위도
+        }
+
+        return HubDetailResponse.from(hub);
+    }
 }

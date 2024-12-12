@@ -4,7 +4,7 @@ import com.spring.dozen.hub.application.dto.HubDto;
 
 import java.util.UUID;
 
-public record HubRequestDto(
+public record HubRequest(
         Long userId,
         UUID centralHubId,
         String address

@@ -4,20 +4,22 @@ import com.spring.dozen.hub.domain.entity.Hub;
 
 import java.util.UUID;
 
-public record HubListResponseDto(
+public record HubResponse(
         UUID hubId,
         Long userId,
         UUID centralHubId,
         String address,
-        boolean isDeleted
+        Double locationX,
+        Double locationY
 ) {
-    public static HubListResponseDto from(Hub hub) {
-        return new HubListResponseDto(
+    public static HubResponse from(Hub hub) {
+        return new HubResponse(
                 hub.getHubId(),
                 hub.getUserId(),
                 hub.getCentralHubId(),
                 hub.getAddress(),
-                hub.isDeleted()
+                hub.getLocationX(),
+                hub.getLocationY()
         );
     }
 }

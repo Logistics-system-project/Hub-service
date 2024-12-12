@@ -5,7 +5,7 @@ import com.spring.dozen.hub.domain.entity.Hub;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public record HubDetailResponseDto(
+public record HubDetailResponse(
         UUID hubId,
         Long userId,
         UUID centralHubId,
@@ -19,8 +19,8 @@ public record HubDetailResponseDto(
         String updatedBy
 
 ) {
-    public static HubDetailResponseDto from(Hub hub) {
-        return new HubDetailResponseDto(
+    public static HubDetailResponse from(Hub hub) {
+        return new HubDetailResponse(
                 hub.getHubId(),
                 hub.getUserId(),
                 hub.getCentralHubId(),
