@@ -34,9 +34,9 @@ public class HubController {
     // 허브 목록 조회
     @GetMapping
     public PageResponseDto<HubListResponseDto> getHubList(
-            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "created_at") String sortBy,
             @RequestParam(defaultValue = "false") boolean isAsc,
             @RequestParam(required = false) String keyword
     ){
@@ -50,7 +50,7 @@ public class HubController {
     }
 
     // 허브 상세 조회
-    @GetMapping("/{hudId}")
+    @GetMapping("/{hubId}")
     public ApiResponseDto <HubDetailResponseDto> getHubDetail(@PathVariable UUID hubId) {
         HubDetailResponseDto response = hubService.getHubDetail(hubId);
         return ApiResponseDto.success(response);

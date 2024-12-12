@@ -51,7 +51,9 @@ public class HubService {
     // 허브 목록 조회
     @Transactional
     public Page<HubListResponseDto> getHubList(int page, int size, String sortBy, boolean isAsc, String keyword){
-        Sort sort = isAsc ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        size = (size == 10 || size == 30 || size == 50) ? size : 10;
+        Sort.Direction direction = isAsc ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Sort sort = Sort.by(direction, sortBy.equals("updated_at") ? "updated_at" : "created_at");
         Pageable pageable = PageRequest.of(page, size, sort);
 
         Page<Hub> hubPage = hubRepository.findByKeyword(keyword, pageable);
