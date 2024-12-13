@@ -1,5 +1,6 @@
 package com.spring.dozen.hub.domain.entity;
 
+import com.spring.dozen.hub.application.dto.HubDto;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.DynamicUpdate;
@@ -36,9 +37,6 @@ public class Hub extends BaseEntity {
     @Column(name = "location_y", columnDefinition = "DECIMAL(12,8)", nullable = false)
     private Double locationY;
 
-    @Column(name = "is_deleted")
-    private boolean isDeleted;
-
     public static Hub create(Long userId,
                              UUID centralHubId,
                              String address,
@@ -54,7 +52,15 @@ public class Hub extends BaseEntity {
         return hub;
     }
 
-    public void deleteHud(boolean isDeleted) {
-        this.isDeleted = isDeleted;
+    public void update(Long userId,
+                          UUID centralHubId,
+                          String address,
+                          Double locationX,
+                          Double locationY) {
+        this.userId = userId;
+        this.centralHubId = centralHubId;
+        this.address = address;
+        this.locationX = locationX;
+        this.locationY = locationY;
     }
 }

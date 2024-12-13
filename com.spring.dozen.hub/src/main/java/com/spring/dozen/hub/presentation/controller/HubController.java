@@ -69,5 +69,4 @@ public class HubController {
         hubService.deleteHub(hubId);
         return ApiResponse.success();
     }
-
 }

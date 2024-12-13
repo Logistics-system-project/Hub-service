@@ -16,7 +16,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -73,33 +72,36 @@ public class HubService {
 
     // 허브 수정
     @Transactional
-    public HubDetailResponse updateHub(UUID hubId,HubDto request){
+    public HubDetailResponse updateHub(UUID hubId, HubDto request){
         // 해당 허브
         Hub hub = hubRepository.findByHubIdAndIsDeletedFalse(hubId)
                 .orElseThrow(() -> new HubException(ErrorCode.NOT_FOUND_HUB));
 
-        // 유저값 확인
-        if (request.userId() != null) {
-            // 유저 유효성 검증
-
-            hub.setUserId(request.userId());
-        }
+        // 유저 유효성 검증
 
         // 중앙허브값 확인
         if (request.centralHubId() != null) {
             // 중앙 허브 유효성 검증
             hubRepository.findByHubIdAndIsDeletedFalse(request.centralHubId())
                     .orElseThrow(() -> new HubException(ErrorCode.NOT_FOUND_HUB));
-            hub.setCentralHubId(request.centralHubId());
         }
 
-        // 주소값
-        if (request.address() != null && !request.address().isEmpty()) {
+        Double locationX = hub.getLocationX();
+        Double locationY = hub.getLocationY();
+
+        if (!request.address().equals(hub.getAddress())) {
             double[] coordinates = addressToCoordinateService.getCoordinates(request.address());
-            hub.setAddress(request.address());
-            hub.setLocationX(coordinates[1]); // 경도
-            hub.setLocationY(coordinates[0]); // 위도
+            locationX = coordinates[1];
+            locationY = coordinates[0];
         }
+
+        hub.update(
+                request.userId(),
+                request.centralHubId(),
+                request.address(),
+                locationX,
+                locationY
+        );
 
         return HubDetailResponse.from(hub);
     }
@@ -111,9 +113,6 @@ public class HubService {
         Hub hub = hubRepository.findByHubIdAndIsDeletedFalse(hubId)
                 .orElseThrow(() -> new HubException(ErrorCode.NOT_FOUND_HUB));
 
-        hub.deleteHud(true);
-
-        hub.setDeletedAt(LocalDateTime.now());
-        //hub.setDeletedBy();
+        //hub.delete();
     }
 }
