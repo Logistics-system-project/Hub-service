@@ -51,13 +51,20 @@ public class HubService {
 
     // 허브 목록 조회
     @Transactional
-    public Page<HubListResponse> getHubList(int page, int size, String sortBy, boolean isAsc, String keyword){
-        size = (size == 10 || size == 30 || size == 50) ? size : 10;
-        Sort.Direction direction = isAsc ? Sort.Direction.ASC : Sort.Direction.DESC;
-        Sort sort = Sort.by(direction, sortBy.equals("updated_at") ? "updated_at" : "created_at");
-        Pageable pageable = PageRequest.of(page, size, sort);
+    public Page<HubListResponse> getHubList(Pageable pageable, String keyword){
+        // size 값 조정
+        int validatedSize = (pageable.getPageSize() == 10 || pageable.getPageSize() == 30 || pageable.getPageSize() == 50)
+                ? pageable.getPageSize()
+                : 10;
 
-        Page<Hub> hubPage = hubRepository.findByKeyword(keyword, pageable);
+        // 새로운 Pageable 생성
+        Pageable validatedPageable = PageRequest.of(
+                pageable.getPageNumber(),
+                validatedSize,
+                pageable.getSort()
+        );
+
+        Page<Hub> hubPage = hubRepository.findByKeyword(keyword, validatedPageable);
 
         return hubPage.map(HubListResponse::from);
     }
