@@ -15,8 +15,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -116,8 +114,6 @@ public class HubService {
         hub.deleteHud(true);
 
         hub.setDeletedAt(LocalDateTime.now());
-        //hub.setDeletedBy("SystemAdmin");
+        //hub.setDeletedBy();
     }
-
-
 }
