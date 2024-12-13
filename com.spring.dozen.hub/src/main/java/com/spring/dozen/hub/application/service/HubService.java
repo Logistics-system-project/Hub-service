@@ -1,9 +1,9 @@
 package com.spring.dozen.hub.application.service;
 
 import com.spring.dozen.hub.application.dto.HubDto;
-import com.spring.dozen.hub.application.dto.response.HubDetailResponseDto;
-import com.spring.dozen.hub.application.dto.response.HubListResponseDto;
-import com.spring.dozen.hub.application.dto.response.HubResponseDto;
+import com.spring.dozen.hub.application.dto.response.HubDetailResponse;
+import com.spring.dozen.hub.application.dto.response.HubListResponse;
+import com.spring.dozen.hub.application.dto.response.HubResponse;
 import com.spring.dozen.hub.application.exception.ErrorCode;
 import com.spring.dozen.hub.application.exception.HubException;
 import com.spring.dozen.hub.domain.entity.Hub;
@@ -27,7 +27,8 @@ public class HubService {
 
     // 허브 생성
     @Transactional
-    public HubResponseDto createHub(HubDto request){
+    public HubResponse createHub(HubDto request){
+        // 유저 확인
 
         // 주소로 위도, 경도 찾기
         double[] coordinates = addressToCoordinateService.getCoordinates(request.address());
@@ -45,30 +46,80 @@ public class HubService {
         );
         hubRepository.save(hub);
 
-        return HubResponseDto.from(hub);
+        return HubResponse.from(hub);
     }
 
     // 허브 목록 조회
     @Transactional
-    public Page<HubListResponseDto> getHubList(int page, int size, String sortBy, boolean isAsc, String keyword){
-        size = (size == 10 || size == 30 || size == 50) ? size : 10;
-        Sort.Direction direction = isAsc ? Sort.Direction.ASC : Sort.Direction.DESC;
-        Sort sort = Sort.by(direction, sortBy.equals("updated_at") ? "updated_at" : "created_at");
-        Pageable pageable = PageRequest.of(page, size, sort);
+    public Page<HubListResponse> getHubList(Pageable pageable, String keyword){
+        // size 값 조정
+        int validatedSize = (pageable.getPageSize() == 10 || pageable.getPageSize() == 30 || pageable.getPageSize() == 50)
+                ? pageable.getPageSize()
+                : 10;
 
-        Page<Hub> hubPage = hubRepository.findByKeyword(keyword, pageable);
+        // 새로운 Pageable 생성
+        Pageable validatedPageable = PageRequest.of(
+                pageable.getPageNumber(),
+                validatedSize,
+                pageable.getSort()
+        );
 
-        return hubPage.map(HubListResponseDto::from);
+        Page<Hub> hubPage = hubRepository.findByKeyword(keyword, validatedPageable);
+
+        return hubPage.map(HubListResponse::from);
     }
 
     // 허브 상세 조회
     @Transactional
-    public HubDetailResponseDto getHubDetail(UUID hubId){
-        Hub hub = hubRepository.findByHubId(hubId)
+    public HubDetailResponse getHubDetail(UUID hubId){
+        Hub hub = hubRepository.findByHubIdAndIsDeletedFalse(hubId)
                 .orElseThrow(() -> new HubException(ErrorCode.NOT_FOUND_HUB));
-        return HubDetailResponseDto.from(hub);
+        return HubDetailResponse.from(hub);
     }
 
+    // 허브 수정
+    @Transactional
+    public HubDetailResponse updateHub(UUID hubId, HubDto request){
+        // 해당 허브
+        Hub hub = hubRepository.findByHubIdAndIsDeletedFalse(hubId)
+                .orElseThrow(() -> new HubException(ErrorCode.NOT_FOUND_HUB));
 
+        // 유저 유효성 검증
 
+        // 중앙허브값 확인
+        if (request.centralHubId() != null) {
+            // 중앙 허브 유효성 검증
+            hubRepository.findByHubIdAndIsDeletedFalse(request.centralHubId())
+                    .orElseThrow(() -> new HubException(ErrorCode.NOT_FOUND_HUB));
+        }
+
+        Double locationX = hub.getLocationX();
+        Double locationY = hub.getLocationY();
+
+        if (!request.address().equals(hub.getAddress())) {
+            double[] coordinates = addressToCoordinateService.getCoordinates(request.address());
+            locationX = coordinates[1];
+            locationY = coordinates[0];
+        }
+
+        hub.update(
+                request.userId(),
+                request.centralHubId(),
+                request.address(),
+                locationX,
+                locationY
+        );
+
+        return HubDetailResponse.from(hub);
+    }
+
+    // 허브 삭제
+    @Transactional
+    public void deleteHub(UUID hubId) {
+        // 해당 허브
+        Hub hub = hubRepository.findByHubIdAndIsDeletedFalse(hubId)
+                .orElseThrow(() -> new HubException(ErrorCode.NOT_FOUND_HUB));
+
+        //hub.delete();
+    }
 }

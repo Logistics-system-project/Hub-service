@@ -16,5 +16,5 @@ public interface HubRepository {
     Page<Hub> findAll(Pageable pageable);
 
     Page<Hub> findByKeyword( String keyword, Pageable pageable);
-    Optional<Hub> findByHubId (UUID hubId);
+    Optional<Hub> findByHubIdAndIsDeletedFalse (UUID hubId);
 }

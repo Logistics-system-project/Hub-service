@@ -36,11 +36,13 @@ public abstract class BaseEntity {
     @Column
     private String deletedBy;
 
-    public void setDeletedAt(LocalDateTime deletedAt) {
-        this.deletedAt = deletedAt;
-    }
+    @Column(name = "is_deleted")
+    private boolean isDeleted;
 
-    public void setDeletedBy(String deletedBy) {
-        this.deletedBy = deletedBy;
+    public void delete(Long userId) {
+        this.isDeleted = true;
+        this.deletedAt = LocalDateTime.now();
+        this.deletedBy = String.valueOf(userId);
+
     }
 }

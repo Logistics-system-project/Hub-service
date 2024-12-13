@@ -1,7 +1,7 @@
 package com.spring.dozen.hub;
 
 import com.spring.dozen.hub.application.dto.HubDto;
-import com.spring.dozen.hub.application.dto.response.HubResponseDto;
+import com.spring.dozen.hub.application.dto.response.HubResponse;
 import com.spring.dozen.hub.application.service.AddressToCoordinateService;
 import com.spring.dozen.hub.application.service.HubService;
 import com.spring.dozen.hub.domain.entity.Hub;
@@ -61,7 +61,7 @@ class HubServiceTest {
         when(hubRepository.save(any(Hub.class))).thenReturn(mockHub);
 
         // when
-        HubResponseDto response = hubService.createHub(request);
+        HubResponse response = hubService.createHub(request);
 
         // then
         assertNotNull(response);
