@@ -15,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.UUID;
 
@@ -121,5 +122,23 @@ public class HubService {
                 .orElseThrow(() -> new HubException(ErrorCode.NOT_FOUND_HUB));
 
         //hub.delete();
+    }
+
+    // 허브 존재 여부 확인
+    @Transactional(readOnly = true)
+    public boolean existsHubByHubId(UUID hubId) {
+        return hubRepository.existsByHubIdAndIsDeletedFalse(hubId);
+    }
+
+    // 허브 관리자 ID 조회
+    @Transactional(readOnly = true)
+    public Long findUserIdByHubId(UUID hubId)  {
+        // 해당 허브
+        Hub hub = hubRepository.findByHubIdAndIsDeletedFalse(hubId)
+                .orElseThrow(() -> new HubException(ErrorCode.NOT_FOUND_HUB));
+
+        Long userId = hub.getUserId();
+
+        return userId;
     }
 }
