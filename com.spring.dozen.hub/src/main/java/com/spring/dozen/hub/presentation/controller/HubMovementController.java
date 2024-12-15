@@ -62,4 +62,12 @@ public class HubMovementController {
         return ApiResponse.success(response);
     }
 
+    // 허브 이동정보 삭제
+    @DeleteMapping("/{hubMovementId}")
+    public ApiResponse<Void> deleteHubMovement(
+            @PathVariable UUID hubMovementId
+    ){
+        hubMovementService.deleteHubMovement(hubMovementId);
+        return ApiResponse.success();
+    }
 }

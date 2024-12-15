@@ -109,6 +109,16 @@ public class HubMovementService {
         return HubMovementDetailResponse.from(hubMovement);
     }
 
+    // 허브 이동정보 삭제
+    @Transactional
+    public void deleteHubMovement(UUID hubMovementId) {
+        // 해당 허브
+        HubMovement hubMovement = hubMovementRepository.findByHubMovementIdAndIsDeletedFalse(hubMovementId)
+                .orElseThrow(() -> new HubException(ErrorCode.NOT_FOUND_HUBMOVEMENT));
+
+        //hubMovement.delete();
+    }
+
     private Hub findValidHub(UUID hubId) {
         return hubRepository.findByHubIdAndIsDeletedFalse(hubId)
                 .orElseThrow(() -> new HubException(ErrorCode.NOT_FOUND_HUB));
