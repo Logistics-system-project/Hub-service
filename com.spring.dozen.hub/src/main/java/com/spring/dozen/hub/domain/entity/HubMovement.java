@@ -12,7 +12,7 @@ import java.util.UUID;
 @Builder(access = AccessLevel.PRIVATE)
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "p_hubMovement")
+@Table(name = "p_hub_movement")
 public class HubMovement extends BaseEntity {
     @Id
     @GeneratedValue(generator = "uuid2")
@@ -57,7 +57,6 @@ public class HubMovement extends BaseEntity {
         this.distance = distance;
     }
 
-    // 포맷된 소요 시간 반환 (예: "2시간 30분")
     public String getFormattedTime() {
         int hours = time / 60;
         int minutes = time % 60;
