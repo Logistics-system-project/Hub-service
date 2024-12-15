@@ -1,6 +1,7 @@
 package com.spring.dozen.hub.application.service;
 
-import com.spring.dozen.hub.application.dto.HubMovementDto;
+import com.spring.dozen.hub.application.dto.HubMovementCreate;
+import com.spring.dozen.hub.application.dto.HubMovementUpdate;
 import com.spring.dozen.hub.application.dto.response.*;
 import com.spring.dozen.hub.application.exception.ErrorCode;
 import com.spring.dozen.hub.application.exception.HubException;
@@ -32,7 +33,7 @@ public class HubMovementService {
 
     // 허브 이동정보 생성
     @Transactional
-    public HubMovementResponse createHubMovement(HubMovementDto request){
+    public HubMovementResponse createHubMovement(HubMovementCreate request){
         // 출발 허브
         Hub departureHub = findValidHub(request.departureHubId());
         // 도착 허브
@@ -90,6 +91,21 @@ public class HubMovementService {
     public HubMovementDetailResponse getHubMovementDetail(UUID hubMovementId){
         HubMovement hubMovement = hubMovementRepository.findByHubMovementIdAndIsDeletedFalse(hubMovementId)
                 .orElseThrow(() -> new HubException(ErrorCode.NOT_FOUND_HUBMOVEMENT));
+        return HubMovementDetailResponse.from(hubMovement);
+    }
+
+    // 허브 이동정보 수정
+    @Transactional
+    public HubMovementDetailResponse updateHubMovement(UUID hubMovementId, HubMovementUpdate request){
+        HubMovement hubMovement = hubMovementRepository.findByHubMovementIdAndIsDeletedFalse(hubMovementId)
+                .orElseThrow(() -> new HubException(ErrorCode.NOT_FOUND_HUBMOVEMENT));
+
+            // 업데이트
+            hubMovement.update(
+                    request.time(),
+                    request.distance()
+            );
+
         return HubMovementDetailResponse.from(hubMovement);
     }
 

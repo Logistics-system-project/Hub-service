@@ -47,12 +47,8 @@ public class HubMovement extends BaseEntity {
         return hubMovement;
     }
 
-    public void update(Hub departureHub,
-                       Hub arrivalHub,
-                       int time,
+    public void update(int time,
                        int distance) {
-        this.departureHub = departureHub;
-        this.arrivalHub = arrivalHub;
         this.time = time;
         this.distance = distance;
     }
@@ -61,5 +57,9 @@ public class HubMovement extends BaseEntity {
         int hours = time / 60;
         int minutes = time % 60;
         return (hours > 0 ? hours + "시간 " : "") + minutes + "분";
+    }
+
+    public String getFormattedDistance() {
+        return distance + "km";
     }
 }

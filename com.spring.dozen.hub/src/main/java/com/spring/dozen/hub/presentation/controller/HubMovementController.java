@@ -24,7 +24,7 @@ public class HubMovementController {
     // 허브 이동정보 생성
     // 권한 추가 예정 : MASTER 관리자 권한만
     @PostMapping
-    public ApiResponse<HubMovementResponse> createHubMovement(@RequestBody HubMovementRequest request) {
+    public ApiResponse<HubMovementResponse> createHubMovement(@RequestBody HubMovementCreateRequest request) {
         HubMovementResponse response = hubMovementService.createHubMovement(request.toDTO());
         return ApiResponse.success(response);
     }
@@ -54,10 +54,10 @@ public class HubMovementController {
         return ApiResponse.success(response);
     }
 
-    // 허브 수정
+    // 허브 이동정보 수정
     @PutMapping("/{hubMovementId}")
     public ApiResponse<HubMovementDetailResponse> updateHubMovement(@PathVariable UUID hubMovementId,
-                                                                    @RequestBody HubMovementRequest request) {
+                                                                    @RequestBody HubMovementUpdateRequest request) {
         HubMovementDetailResponse response = hubMovementService.updateHubMovement(hubMovementId, request.toDTO());;
         return ApiResponse.success(response);
     }

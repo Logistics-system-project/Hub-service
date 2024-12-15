@@ -1,15 +1,15 @@
 package com.spring.dozen.hub.presentation.dto;
 
-import com.spring.dozen.hub.application.dto.HubMovementDto;
+import com.spring.dozen.hub.application.dto.HubMovementCreate;
 
 import java.util.UUID;
 
-public record HubMovementRequest(
+public record HubMovementCreateRequest(
         UUID departureHubId,
         UUID arrivalHubId
 ) {
-    public HubMovementDto toDTO() {
-        return HubMovementDto.of(
+    public HubMovementCreate toDTO() {
+        return HubMovementCreate.of(
                 this.departureHubId,
                 this.arrivalHubId
         );
