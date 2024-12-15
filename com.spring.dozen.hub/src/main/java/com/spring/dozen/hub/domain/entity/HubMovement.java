@@ -56,4 +56,11 @@ public class HubMovement extends BaseEntity {
         this.time = time;
         this.distance = distance;
     }
+
+    // 포맷된 소요 시간 반환 (예: "2시간 30분")
+    public String getFormattedTime() {
+        int hours = time / 60;
+        int minutes = time % 60;
+        return (hours > 0 ? hours + "시간 " : "") + minutes + "분";
+    }
 }

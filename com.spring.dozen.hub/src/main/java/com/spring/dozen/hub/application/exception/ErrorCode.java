@@ -15,6 +15,8 @@ public enum ErrorCode {
 
     // 허브
     NOT_FOUND_HUB(HttpStatus.BAD_REQUEST, "해당 허브를 찾을 수 없습니다."),
+
+
     ;
 
 
