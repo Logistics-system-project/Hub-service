@@ -54,4 +54,12 @@ public class HubMovementController {
         return ApiResponse.success(response);
     }
 
+    // 허브 수정
+    @PutMapping("/{hubMovementId}")
+    public ApiResponse<HubMovementDetailResponse> updateHubMovement(@PathVariable UUID hubMovementId,
+                                                                    @RequestBody HubMovementRequest request) {
+        HubMovementDetailResponse response = hubMovementService.updateHubMovement(hubMovementId, request.toDTO());;
+        return ApiResponse.success(response);
+    }
+
 }
