@@ -1,9 +1,7 @@
 package com.spring.dozen.hub.application.service;
 
 import com.spring.dozen.hub.application.dto.HubMovementDto;
-import com.spring.dozen.hub.application.dto.response.HubListResponse;
-import com.spring.dozen.hub.application.dto.response.HubMovementListResponse;
-import com.spring.dozen.hub.application.dto.response.HubMovementResponse;
+import com.spring.dozen.hub.application.dto.response.*;
 import com.spring.dozen.hub.application.exception.ErrorCode;
 import com.spring.dozen.hub.application.exception.HubException;
 import com.spring.dozen.hub.domain.entity.Hub;
@@ -22,7 +20,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
@@ -147,7 +144,7 @@ public class HubMovementService {
         return response.candidates().get(0).content().parts().get(0).text();
     }
 
-    // 허브 목록 조회
+    // 허브 이동정보 목록 조회
     @Transactional
     public Page<HubMovementListResponse> getHubMovementList(Pageable pageable, String keyword){
         // size 값 조정
@@ -165,5 +162,13 @@ public class HubMovementService {
         Page<HubMovement> hubMovementPage = hubMovementRepository.findByKeyword(keyword, validatedPageable);
 
         return hubMovementPage.map(HubMovementListResponse::from);
+    }
+
+    // 허브 이동정보 상세 조회
+    @Transactional
+    public HubMovementDetailResponse getHubMovementDetail(UUID hubMovementId){
+        HubMovement hubMovement = hubMovementRepository.findByHubMovementIdAndIsDeletedFalse(hubMovementId)
+                .orElseThrow(() -> new HubException(ErrorCode.NOT_FOUND_HUBMOVEMENT));
+        return HubMovementDetailResponse.from(hubMovement);
     }
 }

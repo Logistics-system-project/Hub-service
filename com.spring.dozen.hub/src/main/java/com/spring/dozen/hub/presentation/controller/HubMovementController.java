@@ -1,8 +1,6 @@
 package com.spring.dozen.hub.presentation.controller;
 
-import com.spring.dozen.hub.application.dto.response.HubListResponse;
-import com.spring.dozen.hub.application.dto.response.HubMovementListResponse;
-import com.spring.dozen.hub.application.dto.response.HubMovementResponse;
+import com.spring.dozen.hub.application.dto.response.*;
 import com.spring.dozen.hub.application.service.HubMovementService;
 import com.spring.dozen.hub.presentation.dto.*;
 import lombok.RequiredArgsConstructor;
@@ -11,8 +9,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.SortDefault;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @Slf4j
 @RestController
@@ -46,6 +45,13 @@ public class HubMovementController {
                 hubMovementPage.getNumber(),
                 hubMovementPage.getContent()
         );
+    }
+
+    // 허브 이동정보 상세 조회
+    @GetMapping("/{hubMovementId}")
+    public ApiResponse<HubMovementDetailResponse> getHubMovementDetail(@PathVariable UUID hubMovementId) {
+        HubMovementDetailResponse response = hubMovementService.getHubMovementDetail(hubMovementId);
+        return ApiResponse.success(response);
     }
 
 }

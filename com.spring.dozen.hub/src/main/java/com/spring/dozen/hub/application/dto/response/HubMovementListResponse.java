@@ -1,6 +1,5 @@
 package com.spring.dozen.hub.application.dto.response;
 
-import com.spring.dozen.hub.domain.entity.Hub;
 import com.spring.dozen.hub.domain.entity.HubMovement;
 
 import java.util.UUID;
