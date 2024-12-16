@@ -9,7 +9,7 @@ public record HubMovementResponse(
         UUID departureHubId,
         UUID arrivalHubId,
         String formattedTime,
-        int distance
+        String getFormattedDistance
 ) {
     public static HubMovementResponse from(HubMovement hubMovement) {
         return new HubMovementResponse(
@@ -17,7 +17,7 @@ public record HubMovementResponse(
                 hubMovement.getDepartureHub().getHubId(),
                 hubMovement.getArrivalHub().getHubId(),
                 hubMovement.getFormattedTime(),
-                hubMovement.getDistance()
+                hubMovement.getFormattedDistance()
         );
     }
 }
