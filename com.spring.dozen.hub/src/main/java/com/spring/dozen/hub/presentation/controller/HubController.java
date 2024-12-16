@@ -9,6 +9,10 @@ import com.spring.dozen.hub.presentation.dto.HubRequest;
 import com.spring.dozen.hub.presentation.dto.PageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.SortDefault;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -31,13 +35,13 @@ public class HubController {
     // 허브 목록 조회
     @GetMapping
     public PageResponse<HubListResponse> getHubList(
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "created_at") String sortBy,
-            @RequestParam(defaultValue = "false") boolean isAsc,
+            @SortDefault(
+                    sort = {"created_at"},
+                    direction = Sort.Direction.DESC
+            ) Pageable pageable,
             @RequestParam(required = false) String keyword
-    ){
-        Page<HubListResponse> hubPage = hubService.getHubList(page-1, size, sortBy, isAsc, keyword);
+    ) {
+        Page<HubListResponse> hubPage = hubService.getHubList(pageable, keyword);
 
         return PageResponse.success(
                 hubPage.getTotalPages(),
@@ -63,10 +67,21 @@ public class HubController {
 
     // 허브 삭제
     @DeleteMapping("/{hubId}")
-    public ApiResponse<Void> deleteHub(
-            @PathVariable UUID hubId
-    ){
+    public ApiResponse<Void> deleteHub(@PathVariable UUID hubId) {
         hubService.deleteHub(hubId);
         return ApiResponse.success();
     }
+
+    // 허브 존재 여부 조회
+    @GetMapping("/{hubId}/exists")
+    public boolean existsHubByHubId(@PathVariable UUID hubId) {
+        return hubService.existsHubByHubId(hubId);
+    }
+
+    // 허브 관리자 ID 조회
+    @GetMapping("/{hubId}/manager")
+    public Long findUserIdByHubId(@PathVariable UUID hubId) {
+        return hubService.findUserIdByHubId(hubId);
+    }
+
 }

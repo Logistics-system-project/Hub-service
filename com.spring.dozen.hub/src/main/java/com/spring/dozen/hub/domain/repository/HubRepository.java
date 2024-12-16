@@ -13,8 +13,9 @@ import java.util.UUID;
 public interface HubRepository {
     Hub save(Hub hub);
 
-    Page<Hub> findAll(Pageable pageable);
-
     Page<Hub> findByKeyword( String keyword, Pageable pageable);
     Optional<Hub> findByHubIdAndIsDeletedFalse (UUID hubId);
+
+    boolean existsByHubIdAndIsDeletedFalse(UUID hubId);
+
 }
