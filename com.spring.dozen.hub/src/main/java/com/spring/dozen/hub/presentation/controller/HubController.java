@@ -67,10 +67,21 @@ public class HubController {
 
     // 허브 삭제
     @DeleteMapping("/{hubId}")
-    public ApiResponse<Void> deleteHub(
-            @PathVariable UUID hubId
-    ){
+    public ApiResponse<Void> deleteHub(@PathVariable UUID hubId) {
         hubService.deleteHub(hubId);
         return ApiResponse.success();
     }
+
+    // 허브 존재 여부 조회
+    @GetMapping("/{hubId}/exists")
+    public boolean existsHubByHubId(@PathVariable UUID hubId) {
+        return hubService.existsHubByHubId(hubId);
+    }
+
+    // 허브 관리자 ID 조회
+    @GetMapping("/{hubId}/manager")
+    public Long findUserIdByHubId(@PathVariable UUID hubId) {
+        return hubService.findUserIdByHubId(hubId);
+    }
+
 }
