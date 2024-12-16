@@ -9,17 +9,20 @@ import com.spring.dozen.hub.domain.entity.Hub;
 import com.spring.dozen.hub.domain.entity.HubMovement;
 import com.spring.dozen.hub.domain.repository.HubMovementRepository;
 import com.spring.dozen.hub.domain.repository.HubRepository;
+import com.spring.dozen.hub.presentation.dto.KakaoApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -29,11 +32,17 @@ public class HubMovementService {
     private final HubRepository hubRepository;
     private final HubMovementRepository hubMovementRepository;
 
-    private final GeminiService geminiService;
+    private final RestTemplate restTemplate;
+
+    @Value("${kakao.api.url}")
+    private String kakaoApiUrl;
+
+    @Value("${kakao.api.key}")
+    private String kakaoApiKey;
 
     // 허브 이동정보 생성
     @Transactional
-    public HubMovementResponse createHubMovement(HubMovementCreate request){
+    public HubMovementResponse createHubMovement(HubMovementCreate request) {
         // 출발 허브
         Hub departureHub = findValidHub(request.departureHubId());
         // 도착 허브
@@ -45,20 +54,34 @@ public class HubMovementService {
         // 도착 허브의 중앙 허브 정보
         Hub centralArrivalHub = findCentralHub(arrivalHub);
 
-        // 이동 경로 주소
-        List<String> addresses = buildRouteAddresses(departureHub, centralDepartureHub, centralArrivalHub, arrivalHub);
+        // 이동 경로 허브 리스트
+        List<Hub> hubRoute = buildRoute(departureHub, centralDepartureHub, centralArrivalHub, arrivalHub);
 
-        // Gemini API 호출
-         String response = geminiService.callGeminiAPI(addresses);
+        int totalDistance = 0; // 총 거리 (m)
+        int totalDuration = 0; // 총 소요 시간 (초)
 
-        // Gemini 응답에서 거리 및 시간 추출
-        int totalTime = geminiService.extractTotalTime(response);
-        int totalDistance = geminiService.extractTotalDistance(response);
+        // 각 허브 간 API 호출하여 총 거리 및 시간 계산
+        for (int i = 0; i < hubRoute.size() - 1; i++) {
+            Hub originHub = hubRoute.get(i);
+            Hub destinationHub = hubRoute.get(i + 1);
 
+            // 위도, 경도를 가져와 API 호출
+            KakaoApiResponse response = getDirections(originHub, destinationHub);
+
+            if (response != null && Arrays.asList(response.routes()).size() > 0) {
+                KakaoApiResponse.Route route = Arrays.asList(response.routes()).get(0);
+                totalDistance += route.summary().distance();
+                totalDuration += route.summary().duration();
+            } else {
+                log.warn("Failed to retrieve route between {} and {}", originHub.getHubId(), destinationHub.getHubId());
+            }
+        }
+
+        // 허브 이동 엔티티 생성
         HubMovement hubMovement = HubMovement.create(
                 departureHub,
                 arrivalHub,
-                totalTime,
+                totalDuration,
                 totalDistance
         );
         hubMovementRepository.save(hubMovement);
@@ -132,19 +155,41 @@ public class HubMovementService {
         return null;
     }
 
-    private List<String> buildRouteAddresses(Hub departureHub, Hub centralDepartureHub, Hub centralArrivalHub, Hub arrivalHub) {
-        List<String> addresses = new ArrayList<>();
-        addresses.add(departureHub.getAddress());
+    private List<Hub> buildRoute(Hub departureHub, Hub centralDepartureHub, Hub centralArrivalHub, Hub arrivalHub) {
+        List<Hub> hubRoute = new ArrayList<>();
+        hubRoute.add(departureHub);
 
         if (centralDepartureHub != null) {
-            addresses.add(centralDepartureHub.getAddress());
+            hubRoute.add(centralDepartureHub);
         }
 
         if (centralArrivalHub != null) {
-            addresses.add(centralArrivalHub.getAddress());
+            hubRoute.add(centralArrivalHub);
         }
 
-        addresses.add(arrivalHub.getAddress());
-        return addresses;
+        hubRoute.add(arrivalHub);
+        return hubRoute;
+    }
+
+    public KakaoApiResponse getDirections(Hub originHub, Hub destinationHub) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "KakaoAK " + kakaoApiKey);
+
+        String url = UriComponentsBuilder.fromHttpUrl(kakaoApiUrl)
+                .queryParam("origin", originHub.getLocationX() + "," + originHub.getLocationY())
+                .queryParam("destination", destinationHub.getLocationX() + "," + destinationHub.getLocationY())
+                .queryParam("priority", "RECOMMEND")
+                .toUriString();
+
+        HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
+
+        ResponseEntity<KakaoApiResponse> response = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                requestEntity,
+                KakaoApiResponse.class
+        );
+
+        return response.getBody();
     }
 }

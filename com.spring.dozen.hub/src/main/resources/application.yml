@@ -24,7 +24,12 @@ eureka:
     service-url:
       defaultZone: http://localhost:19090/eureka/
 
-gemini:
+google:
   api:
-    url: https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent
-    key: ${GEMINI_API_KEY}
+    url: https://maps.googleapis.com/maps/api/distancematrix/json
+    key: ${GOOGLE_API_KEY}
+
+kakao:
+  api:
+    url: https://apis-navi.kakaomobility.com/v1/directions
+    key: ${KAKAO_API_KEY}
