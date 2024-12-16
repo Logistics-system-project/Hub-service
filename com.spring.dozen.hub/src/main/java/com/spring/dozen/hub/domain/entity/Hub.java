@@ -22,6 +22,9 @@ public class Hub extends BaseEntity {
     @Column(name = "hub_id", nullable = false, columnDefinition = "BINARY(16)")
     private UUID hubId;
 
+    @Column(name = "hub_name", nullable = false)
+    private String hubName;
+
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
