@@ -74,13 +74,13 @@ public class HubController {
 
     // 허브 존재 여부 조회
     @GetMapping("/{hubId}/exists")
-    public boolean existsHubByHubId(@RequestParam UUID hubId) {
+    public boolean existsHubByHubId(@PathVariable UUID hubId) {
         return hubService.existsHubByHubId(hubId);
     }
 
     // 허브 관리자 ID 조회
     @GetMapping("/{hubId}/manager")
-    public Long findUserIdByHubId(@RequestParam UUID hubId) {
+    public Long findUserIdByHubId(@PathVariable UUID hubId) {
         return hubService.findUserIdByHubId(hubId);
     }
 
