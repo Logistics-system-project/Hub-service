@@ -47,8 +47,8 @@ public class GeminiService {
 
     // 총 소요 시간 추출
     public int extractTotalTime(String response) {
-        String timePattern = "(?s)총 소요시간:\\s*약\\s*(\\d+)시간\\s*(\\d+)?분?";
-        Pattern timeRegex = Pattern.compile(timePattern);
+        String timePattern = "\\*\\*총 소요시간:\\*\\*\\s*약\\s*(\\d+)시간(?:\\s*(\\d+)분)?";
+        Pattern timeRegex = Pattern.compile(timePattern, Pattern.MULTILINE);
         Matcher timeMatcher = timeRegex.matcher(response);
 
         int hours = 0;
@@ -60,18 +60,22 @@ public class GeminiService {
                 minutes = Integer.parseInt(timeMatcher.group(2));
             }
         }
+        log.info("hours: {}", hours );
+        log.info("minutes: {}", minutes );
 
         return hours * 60 + minutes;
     }
 
     // 총 이동 거리 추출
     public int extractTotalDistance(String response) {
-        String distancePattern = "(?s)총 이동거리:\\s*약\\s*(\\d+)km";
-        Pattern distanceRegex = Pattern.compile(distancePattern);
+        String distancePattern = "\\*\\*총 이동거리:\\*\\*\\s*약\\s*(\\d+)km";
+        Pattern distanceRegex = Pattern.compile(distancePattern, Pattern.MULTILINE);
         Matcher distanceMatcher = distanceRegex.matcher(response);
 
         if (distanceMatcher.find()) {
-            return Integer.parseInt(distanceMatcher.group(1));
+            int distance = Integer.parseInt(distanceMatcher.group(1));
+            log.info("distance: {}", distance);
+            return distance;
         }
 
         return 0;
