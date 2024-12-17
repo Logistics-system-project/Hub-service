@@ -9,6 +9,7 @@ import com.spring.dozen.hub.application.exception.HubException;
 import com.spring.dozen.hub.domain.entity.Hub;
 import com.spring.dozen.hub.domain.repository.HubRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -37,6 +38,7 @@ public class HubService {
         // Hub 엔티티에 객체 생성에 대한 책임을 부여
         Hub hub = Hub.create(
                 request.userId(),
+                request.hubName(),
                 request.centralHubId(),
                 request.address(),
                 locationX,
@@ -48,6 +50,7 @@ public class HubService {
     }
 
     // 허브 목록 조회
+//    @Cacheable(cacheNames = "hubListCache",key = "args[0]")
     @Transactional
     public Page<HubListResponse> getHubList(Pageable pageable, String keyword){
         // size 값 조정
@@ -68,6 +71,7 @@ public class HubService {
     }
 
     // 허브 상세 조회
+    @Cacheable(cacheNames = "hubCache", key = "args[0]")
     @Transactional
     public HubDetailResponse getHubDetail(UUID hubId){
         Hub hub = hubRepository.findByHubIdAndIsDeletedFalse(hubId)
@@ -100,6 +104,7 @@ public class HubService {
 
         hub.update(
                 request.userId(),
+                request.hubName(),
                 request.centralHubId(),
                 request.address(),
                 locationX,

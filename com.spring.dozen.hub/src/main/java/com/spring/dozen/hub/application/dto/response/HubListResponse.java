@@ -7,6 +7,7 @@ import java.util.UUID;
 public record HubListResponse(
         UUID hubId,
         Long userId,
+        String hubName,
         UUID centralHubId,
         String address,
         boolean isDeleted
@@ -15,6 +16,7 @@ public record HubListResponse(
         return new HubListResponse(
                 hub.getHubId(),
                 hub.getUserId(),
+                hub.getHubName(),
                 hub.getCentralHubId(),
                 hub.getAddress(),
                 hub.isDeleted()

@@ -16,6 +16,10 @@ spring:
         format_sql: true
         use_sql_comments: true
         highlight_sql: true
+  data:
+    redis:
+      host: localhost
+      port: 6379
 
 server:
   port: 19093

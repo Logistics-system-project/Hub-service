@@ -3,7 +3,6 @@ package com.spring.dozen.hub.presentation.controller;
 import com.spring.dozen.hub.application.annotation.RequireRole;
 import com.spring.dozen.hub.application.dto.response.*;
 import com.spring.dozen.hub.application.service.HubMovementService;
-import com.spring.dozen.hub.domain.entity.Hub;
 import com.spring.dozen.hub.presentation.dto.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -80,7 +79,7 @@ public class HubMovementController {
 
     // 허브 이동경로 조회
     @GetMapping("/route")
-    public List<UUID> getRoute(@RequestParam UUID departureHubId, @RequestParam UUID arrivalHubId) {
+    public List<HubMovementRouteResponse> getRoute(@RequestParam UUID departureHubId, @RequestParam UUID arrivalHubId) {
         return hubMovementService.getHubRoute(departureHubId, arrivalHubId);
     }
 }

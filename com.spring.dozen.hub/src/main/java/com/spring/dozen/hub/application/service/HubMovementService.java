@@ -19,7 +19,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -145,7 +144,7 @@ public class HubMovementService {
 
     // 허브 이동경로 조회
     @Transactional
-    public List<UUID> getHubRoute(UUID departureHubId, UUID arrivalHubId) {
+    public List<HubMovementRouteResponse> getHubRoute(UUID departureHubId, UUID arrivalHubId) {
         // 출발 허브
         Hub departureHub = findValidHub(departureHubId);
         // 도착 허브
@@ -164,7 +163,21 @@ public class HubMovementService {
         }
 
         hubRoute.add(arrivalHubId);
-        return new ArrayList<>(hubRoute);
+
+        // 허브 ID 리스트를 순서대로 처리
+        List<UUID> hubIdList = new ArrayList<>(hubRoute);
+
+        List<HubMovementRouteResponse> RouteResponse = new ArrayList<>();
+
+        // 모든 허브 이동 정보 조회 및 반복 처리
+        for (int i = 0; i < hubIdList.size() - 1; i++) {
+            UUID currentHubId = hubIdList.get(i);
+            UUID nextHubId = hubIdList.get(i + 1);
+
+            HubMovement hubMovement = findHubMovement(currentHubId, nextHubId);
+            RouteResponse.add(HubMovementRouteResponse.from(hubMovement));
+        }
+        return RouteResponse;
     }
 
     private Hub findValidHub(UUID hubId) {
@@ -178,6 +191,12 @@ public class HubMovementService {
                     .orElseThrow(() -> new HubException(ErrorCode.NOT_FOUND_HUB));
         }
         return null;
+    }
+
+    // 허브 이동 정보를 조회하는 메서드
+    private HubMovement findHubMovement(UUID departureHubId, UUID arrivalHubId) {
+        return hubMovementRepository.findByDepartureHub_HubIdAndArrivalHub_HubId(departureHubId, arrivalHubId)
+                .orElseThrow(() -> new HubException(ErrorCode.NOT_FOUND_HUBMOVEMENT));
     }
 
     private List<Hub> buildRoute(Hub departureHub, Hub centralDepartureHub, Hub centralArrivalHub, Hub arrivalHub) {

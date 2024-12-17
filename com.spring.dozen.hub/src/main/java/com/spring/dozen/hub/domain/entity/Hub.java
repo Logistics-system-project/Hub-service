@@ -41,12 +41,14 @@ public class Hub extends BaseEntity {
     private Double locationY;
 
     public static Hub create(Long userId,
+                             String hubName,
                              UUID centralHubId,
                              String address,
                              Double locationX,
                              Double locationY) {
         Hub hub = Hub.builder()
                 .userId(userId)
+                .hubName(hubName)
                 .centralHubId(centralHubId)
                 .address(address)
                 .locationX(locationX)
@@ -55,12 +57,14 @@ public class Hub extends BaseEntity {
         return hub;
     }
 
-    public void update(Long userId,
+    public void update(   Long userId,
+                          String hubName,
                           UUID centralHubId,
                           String address,
                           Double locationX,
                           Double locationY) {
         this.userId = userId;
+        this.hubName = hubName;
         this.centralHubId = centralHubId;
         this.address = address;
         this.locationX = locationX;
