@@ -6,6 +6,7 @@ import com.spring.dozen.hub.application.service.HubMovementService;
 import com.spring.dozen.hub.presentation.dto.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -40,7 +41,7 @@ public class HubMovementController {
             ) Pageable pageable,
             @RequestParam(required = false) String keyword
     ) {
-        Page<HubMovementListResponse> hubMovementPage = hubMovementService.getHubMovementList(pageable, keyword);
+        Page<HubMovementListResponse> hubMovementPage = hubMovementService.getHubMovementList(keyword, pageable);
 
         return PageResponse.success(
                 hubMovementPage.getTotalPages(),

@@ -41,7 +41,7 @@ public class HubController {
             ) Pageable pageable,
             @RequestParam(required = false) String keyword
     ) {
-        Page<HubListResponse> hubPage = hubService.getHubList(pageable, keyword);
+        Page<HubListResponse> hubPage = hubService.getHubList(keyword, pageable);
 
         return PageResponse.success(
                 hubPage.getTotalPages(),

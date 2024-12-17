@@ -13,6 +13,7 @@ import com.spring.dozen.hub.presentation.dto.KakaoApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -123,8 +124,10 @@ public class HubMovementService {
     }
 
     // 허브 이동정보 목록 조회
+//    @Cacheable(cacheNames = "hubMovementListCache",
+//            key = "{ args[0], args[1].pageNumber, args[2].pageSize }")
     @Transactional
-    public Page<HubMovementListResponse> getHubMovementList(Pageable pageable, String keyword){
+    public Page<HubMovementListResponse> getHubMovementList(String keyword, Pageable pageable){
         // size 값 조정
         int validatedSize = (pageable.getPageSize() == 10 || pageable.getPageSize() == 30 || pageable.getPageSize() == 50)
                 ? pageable.getPageSize()
@@ -143,6 +146,7 @@ public class HubMovementService {
     }
 
     // 허브 이동정보 상세 조회
+    @Cacheable(cacheNames = "hubMovementCache", key = "args[0]")
     @Transactional
     public HubMovementDetailResponse getHubMovementDetail(UUID hubMovementId){
         HubMovement hubMovement = hubMovementRepository.findByHubMovementIdAndIsDeletedFalse(hubMovementId)

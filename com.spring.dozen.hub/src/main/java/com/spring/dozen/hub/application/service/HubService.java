@@ -50,9 +50,10 @@ public class HubService {
     }
 
     // 허브 목록 조회
-//    @Cacheable(cacheNames = "hubListCache",key = "args[0]")
+//    @Cacheable(cacheNames = "hubListCache",
+//            key = "{ args[0], args[1].pageNumber, args[2].pageSize }")
     @Transactional
-    public Page<HubListResponse> getHubList(Pageable pageable, String keyword){
+    public Page<HubListResponse> getHubList(String keyword, Pageable pageable){
         // size 값 조정
         int validatedSize = (pageable.getPageSize() == 10 || pageable.getPageSize() == 30 || pageable.getPageSize() == 50)
                 ? pageable.getPageSize()
