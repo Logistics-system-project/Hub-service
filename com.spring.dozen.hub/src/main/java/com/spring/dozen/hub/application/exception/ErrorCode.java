@@ -17,13 +17,13 @@ public enum ErrorCode {
     NOT_FOUND_HUB(HttpStatus.NOT_FOUND, "해당 허브를 찾을 수 없습니다."),
     // 허브 이동정보
     NOT_FOUND_HUBMOVEMENT(HttpStatus.NOT_FOUND, "해당 허브 이동 정보를 찾을 수 없습니다."),
+    ALREADY_EXISTS_HUBMOVEMENT(HttpStatus.CONFLICT, "허브 이동 정보가 이미 등록되어 있습니다."),
+    FAILED_TO_RETRIEVE_ROUTE(HttpStatus.BAD_REQUEST, "허브 간 경로 정보를 불러오지 못했습니다."),
 
     // 권한
     ACCESS_DENIED(HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
     MISSING_ROLE(HttpStatus.BAD_REQUEST, "권한 정보가 없습니다."),
     ;
-
-
 
     private final HttpStatus httpStatus;
     private final String message;

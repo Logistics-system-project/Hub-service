@@ -48,6 +48,14 @@ public class HubMovementService {
         // 도착 허브
         Hub arrivalHub = findValidHub(request.arrivalHubId());
 
+        // 기존 전체 허브 이동 정보 조회
+        HubMovement existingOverallMovement = findExistingHubMovement(departureHub, arrivalHub);
+
+        if (existingOverallMovement != null) {
+            // 이미 전체 허브 이동 정보가 존재하는 경우
+            throw new HubException(ErrorCode.ALREADY_EXISTS_HUBMOVEMENT);
+        }
+
         // 출발 허브의 중앙 허브
         Hub centralDepartureHub = findCentralHub(departureHub);
 
@@ -57,36 +65,61 @@ public class HubMovementService {
         // 이동 경로 허브 리스트
         List<Hub> hubRoute = buildRoute(departureHub, centralDepartureHub, centralArrivalHub, arrivalHub);
 
-        int totalDistance = 0; // 총 거리 (m)
-        int totalDuration = 0; // 총 소요 시간 (초)
+        int totalDistance = 0; // 전체 경로의 총 거리 (m)
+        int totalDuration = 0; // 전체 경로의 총 소요 시간 (초)
 
-        // 각 허브 간 API 호출하여 총 거리 및 시간 계산
+        // 각 허브 간 이동 정보를 처리
         for (int i = 0; i < hubRoute.size() - 1; i++) {
             Hub originHub = hubRoute.get(i);
             Hub destinationHub = hubRoute.get(i + 1);
 
-            // 위도, 경도를 가져와 API 호출
-            KakaoApiResponse response = getDirections(originHub, destinationHub);
+            // 기존 허브 이동 정보 조회
+            HubMovement existingMovement = findExistingHubMovement(originHub, destinationHub);
 
-            if (response != null && Arrays.asList(response.routes()).size() > 0) {
-                KakaoApiResponse.Route route = Arrays.asList(response.routes()).get(0);
-                totalDistance += route.summary().distance();
-                totalDuration += route.summary().duration();
+            int segmentDistance;
+            int segmentDuration;
+
+            if (existingMovement != null) {
+                // 기존 데이터 활용
+                segmentDistance = existingMovement.getDistance();
+                segmentDuration = existingMovement.getTime();
             } else {
-                log.warn("Failed to retrieve route between {} and {}", originHub.getHubId(), destinationHub.getHubId());
+                // 이동 정보 API 호출
+                KakaoApiResponse response = getDirections(originHub, destinationHub);
+
+                if (response != null && Arrays.asList(response.routes()).size() > 0) {
+                    KakaoApiResponse.Route route = Arrays.asList(response.routes()).get(0);
+                    segmentDistance = route.summary().distance();
+                    segmentDuration = route.summary().duration();
+
+                    // 새로운 이동 정보 저장
+                    HubMovement newMovement = HubMovement.create(
+                            originHub,
+                            destinationHub,
+                            segmentDuration,
+                            segmentDistance
+                    );
+                    hubMovementRepository.save(newMovement);
+                } else {
+                    throw new HubException(ErrorCode.FAILED_TO_RETRIEVE_ROUTE);
+                }
             }
+
+            // 전체 경로의 거리 및 시간 업데이트
+            totalDistance += segmentDistance;
+            totalDuration += segmentDuration;
         }
 
-        // 허브 이동 엔티티 생성
-        HubMovement hubMovement = HubMovement.create(
+        // 전체 경로에 대한 HubMovement 생성 및 저장
+        HubMovement overallMovement = HubMovement.create(
                 departureHub,
                 arrivalHub,
                 totalDuration,
                 totalDistance
         );
-        hubMovementRepository.save(hubMovement);
+        hubMovementRepository.save(overallMovement);
 
-        return HubMovementResponse.from(hubMovement);
+        return HubMovementResponse.from(overallMovement);
     }
 
     // 허브 이동정보 목록 조회
@@ -197,6 +230,10 @@ public class HubMovementService {
     private HubMovement findHubMovement(UUID departureHubId, UUID arrivalHubId) {
         return hubMovementRepository.findByDepartureHub_HubIdAndArrivalHub_HubId(departureHubId, arrivalHubId)
                 .orElseThrow(() -> new HubException(ErrorCode.NOT_FOUND_HUBMOVEMENT));
+    }
+
+    private HubMovement findExistingHubMovement(Hub departureHubId, Hub arrivalHub) {
+        return hubMovementRepository.findByDepartureHub_HubIdAndArrivalHub_HubId(departureHubId.getHubId(), arrivalHub.getHubId()).orElse(null);
     }
 
     private List<Hub> buildRoute(Hub departureHub, Hub centralDepartureHub, Hub centralArrivalHub, Hub arrivalHub) {
