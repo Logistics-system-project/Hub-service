@@ -39,10 +39,10 @@ public abstract class BaseEntity {
     @Column(name = "is_deleted")
     private boolean isDeleted;
 
-    public void delete(Long userId) {
+    public void delete(String userId) {
         this.isDeleted = true;
         this.deletedAt = LocalDateTime.now();
-        this.deletedBy = String.valueOf(userId);
+        this.deletedBy = userId;
 
     }
 }

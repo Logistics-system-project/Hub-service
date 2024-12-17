@@ -27,7 +27,6 @@ public class HubService {
     // 허브 생성
     @Transactional
     public HubResponse createHub(HubDto request){
-        // 유저 확인
 
         // 주소로 위도, 경도 찾기
         double[] coordinates = addressToCoordinateService.getCoordinates(request.address());
@@ -83,8 +82,6 @@ public class HubService {
         Hub hub = hubRepository.findByHubIdAndIsDeletedFalse(hubId)
                 .orElseThrow(() -> new HubException(ErrorCode.NOT_FOUND_HUB));
 
-        // 유저 유효성 검증
-
         // 중앙허브값 확인
         if (request.centralHubId() != null) {
             // 중앙 허브 유효성 검증
@@ -114,12 +111,12 @@ public class HubService {
 
     // 허브 삭제
     @Transactional
-    public void deleteHub(UUID hubId) {
+    public void deleteHub(UUID hubId, String userId) {
         // 해당 허브
         Hub hub = hubRepository.findByHubIdAndIsDeletedFalse(hubId)
                 .orElseThrow(() -> new HubException(ErrorCode.NOT_FOUND_HUB));
 
-        //hub.delete();
+        hub.delete(userId);
     }
 
     // 허브 존재 여부 확인

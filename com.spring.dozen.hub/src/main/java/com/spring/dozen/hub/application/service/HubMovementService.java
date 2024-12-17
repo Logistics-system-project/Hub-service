@@ -19,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -134,12 +135,36 @@ public class HubMovementService {
 
     // 허브 이동정보 삭제
     @Transactional
-    public void deleteHubMovement(UUID hubMovementId) {
+    public void deleteHubMovement(UUID hubMovementId, String userId) {
         // 해당 허브
         HubMovement hubMovement = hubMovementRepository.findByHubMovementIdAndIsDeletedFalse(hubMovementId)
                 .orElseThrow(() -> new HubException(ErrorCode.NOT_FOUND_HUBMOVEMENT));
 
-        //hubMovement.delete();
+        hubMovement.delete(userId);
+    }
+
+    // 허브 이동경로 조회
+    @Transactional
+    public List<UUID> getHubRoute(UUID departureHubId, UUID arrivalHubId) {
+        // 출발 허브
+        Hub departureHub = findValidHub(departureHubId);
+        // 도착 허브
+        Hub arrivalHub = findValidHub(arrivalHubId);
+
+        // 이동 경로 허브 리스트
+        Set<UUID> hubRoute = new LinkedHashSet<>();
+        hubRoute.add(departureHubId);
+
+        if (departureHub.getCentralHubId() != null) {
+            hubRoute.add(departureHub.getCentralHubId());
+        }
+
+        if (arrivalHub.getCentralHubId() != null) {
+            hubRoute.add(arrivalHub.getCentralHubId());
+        }
+
+        hubRoute.add(arrivalHubId);
+        return new ArrayList<>(hubRoute);
     }
 
     private Hub findValidHub(UUID hubId) {
@@ -156,7 +181,7 @@ public class HubMovementService {
     }
 
     private List<Hub> buildRoute(Hub departureHub, Hub centralDepartureHub, Hub centralArrivalHub, Hub arrivalHub) {
-        List<Hub> hubRoute = new ArrayList<>();
+        Set<Hub> hubRoute = new LinkedHashSet<>();
         hubRoute.add(departureHub);
 
         if (centralDepartureHub != null) {
@@ -168,7 +193,7 @@ public class HubMovementService {
         }
 
         hubRoute.add(arrivalHub);
-        return hubRoute;
+        return new ArrayList<>(hubRoute);
     }
 
     public KakaoApiResponse getDirections(Hub originHub, Hub destinationHub) {
