@@ -46,18 +46,19 @@ class HubServiceTest {
     void testCreateHub() {
         // given
         Long userId = 1L;
+        String hubName = "테스트";
         UUID centralHubId = UUID.fromString("550e8400-e29b-41d4-a716-446655440000");
         String address = "전북 익산시 망산길 11-17";
         Double locationY = 35.976749396987046;
         Double locationX = 126.99599512792346;
 
-        HubDto request = new HubDto(userId, centralHubId, address);
+        HubDto request = new HubDto(userId,  hubName,centralHubId, address);
 
         double[] mockCoordinates = {locationY, locationX};
 
         when(addressToCoordinateService .getCoordinates(address)).thenReturn(mockCoordinates);
 
-        Hub mockHub = Hub.create(userId, centralHubId, address, locationY, locationX);
+        Hub mockHub = Hub.create(userId, hubName, centralHubId, address, locationY, locationX);
         when(hubRepository.save(any(Hub.class))).thenReturn(mockHub);
 
         // when

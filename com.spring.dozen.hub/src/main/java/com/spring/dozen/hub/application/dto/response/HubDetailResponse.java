@@ -8,6 +8,7 @@ import java.util.UUID;
 public record HubDetailResponse(
         UUID hubId,
         Long userId,
+        String hubName,
         UUID centralHubId,
         String address,
         Double locationX,
@@ -23,6 +24,7 @@ public record HubDetailResponse(
         return new HubDetailResponse(
                 hub.getHubId(),
                 hub.getUserId(),
+                hub.getHubName(),
                 hub.getCentralHubId(),
                 hub.getAddress(),
                 hub.getLocationX(),

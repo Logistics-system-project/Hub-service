@@ -5,6 +5,7 @@ import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @Entity
 @Getter
@@ -29,10 +30,10 @@ public class HubMovement extends BaseEntity {
     private Hub arrivalHub;
 
     @Column(name = "time", nullable = false)
-    private int time;
+    private int time; // 초
 
     @Column(name = "distance", nullable = false)
-    private int distance;
+    private int distance; // 미터
 
     public static HubMovement create(Hub departureHub,
                                      Hub arrivalHub,
@@ -54,12 +55,13 @@ public class HubMovement extends BaseEntity {
     }
 
     public String getFormattedTime() {
-        int hours = time / 60;
-        int minutes = time % 60;
+        long hours = TimeUnit.SECONDS.toHours(time);
+        long minutes = TimeUnit.SECONDS.toMinutes(time) - TimeUnit.HOURS.toMinutes(hours);
         return (hours > 0 ? hours + "시간 " : "") + minutes + "분";
     }
 
     public String getFormattedDistance() {
-        return distance + "km";
+        double kilometers = distance / 1000.0;
+        return String.format("%.1fkm", kilometers);
     }
 }

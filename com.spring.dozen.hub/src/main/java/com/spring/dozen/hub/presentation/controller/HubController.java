@@ -1,5 +1,6 @@
 package com.spring.dozen.hub.presentation.controller;
 
+import com.spring.dozen.hub.application.annotation.RequireRole;
 import com.spring.dozen.hub.application.dto.response.HubDetailResponse;
 import com.spring.dozen.hub.application.dto.response.HubListResponse;
 import com.spring.dozen.hub.application.dto.response.HubResponse;
@@ -11,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.SortDefault;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,8 +25,8 @@ public class HubController {
     private final HubService hubService;
 
     // 허브 생성
-    // 권한 추가 예정 : MASTER 관리자 권한만
     @PostMapping
+    @RequireRole({"MASTER"})
     public ApiResponse<HubResponse> createHub(@RequestBody HubRequest request) {
         HubResponse response = hubService.createHub(request.toDTO());
         return ApiResponse.success(response);
@@ -41,7 +41,7 @@ public class HubController {
             ) Pageable pageable,
             @RequestParam(required = false) String keyword
     ) {
-        Page<HubListResponse> hubPage = hubService.getHubList(pageable, keyword);
+        Page<HubListResponse> hubPage = hubService.getHubList(keyword, pageable);
 
         return PageResponse.success(
                 hubPage.getTotalPages(),
@@ -59,6 +59,7 @@ public class HubController {
 
     // 허브 수정
     @PutMapping("/{hubId}")
+    @RequireRole({"MASTER"})
     public ApiResponse<HubDetailResponse> updateHub(@PathVariable UUID hubId,
                                                     @RequestBody HubRequest request) {
         HubDetailResponse response = hubService.updateHub(hubId, request.toDTO());;
@@ -67,8 +68,10 @@ public class HubController {
 
     // 허브 삭제
     @DeleteMapping("/{hubId}")
-    public ApiResponse<Void> deleteHub(@PathVariable UUID hubId) {
-        hubService.deleteHub(hubId);
+    @RequireRole({"MASTER"})
+    public ApiResponse<Void> deleteHub(@PathVariable UUID hubId,
+                                       @RequestHeader(value = "X-User-Id", required = true)  String userId) {
+        hubService.deleteHub(hubId, userId);
         return ApiResponse.success();
     }
 

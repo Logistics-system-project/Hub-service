@@ -16,6 +16,10 @@ spring:
         format_sql: true
         use_sql_comments: true
         highlight_sql: true
+  data:
+    redis:
+      host: localhost
+      port: 6379
 
 server:
   port: 19093
@@ -24,7 +28,7 @@ eureka:
     service-url:
       defaultZone: http://localhost:19090/eureka/
 
-gemini:
+kakao:
   api:
-    url: https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent
-    key: ${GEMINI_API_KEY}
+    url: https://apis-navi.kakaomobility.com/v1/directions
+    key: ${KAKAO_API_KEY}

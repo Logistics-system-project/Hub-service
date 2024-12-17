@@ -9,13 +9,12 @@ import com.spring.dozen.hub.application.exception.HubException;
 import com.spring.dozen.hub.domain.entity.Hub;
 import com.spring.dozen.hub.domain.repository.HubRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.UUID;
 
@@ -29,7 +28,6 @@ public class HubService {
     // 허브 생성
     @Transactional
     public HubResponse createHub(HubDto request){
-        // 유저 확인
 
         // 주소로 위도, 경도 찾기
         double[] coordinates = addressToCoordinateService.getCoordinates(request.address());
@@ -40,6 +38,7 @@ public class HubService {
         // Hub 엔티티에 객체 생성에 대한 책임을 부여
         Hub hub = Hub.create(
                 request.userId(),
+                request.hubName(),
                 request.centralHubId(),
                 request.address(),
                 locationX,
@@ -51,8 +50,10 @@ public class HubService {
     }
 
     // 허브 목록 조회
+//    @Cacheable(cacheNames = "hubListCache",
+//            key = "{ args[0], args[1].pageNumber, args[2].pageSize }")
     @Transactional
-    public Page<HubListResponse> getHubList(Pageable pageable, String keyword){
+    public Page<HubListResponse> getHubList(String keyword, Pageable pageable){
         // size 값 조정
         int validatedSize = (pageable.getPageSize() == 10 || pageable.getPageSize() == 30 || pageable.getPageSize() == 50)
                 ? pageable.getPageSize()
@@ -71,6 +72,7 @@ public class HubService {
     }
 
     // 허브 상세 조회
+    @Cacheable(cacheNames = "hubCache", key = "args[0]")
     @Transactional
     public HubDetailResponse getHubDetail(UUID hubId){
         Hub hub = hubRepository.findByHubIdAndIsDeletedFalse(hubId)
@@ -84,8 +86,6 @@ public class HubService {
         // 해당 허브
         Hub hub = hubRepository.findByHubIdAndIsDeletedFalse(hubId)
                 .orElseThrow(() -> new HubException(ErrorCode.NOT_FOUND_HUB));
-
-        // 유저 유효성 검증
 
         // 중앙허브값 확인
         if (request.centralHubId() != null) {
@@ -105,6 +105,7 @@ public class HubService {
 
         hub.update(
                 request.userId(),
+                request.hubName(),
                 request.centralHubId(),
                 request.address(),
                 locationX,
@@ -116,12 +117,12 @@ public class HubService {
 
     // 허브 삭제
     @Transactional
-    public void deleteHub(UUID hubId) {
+    public void deleteHub(UUID hubId, String userId) {
         // 해당 허브
         Hub hub = hubRepository.findByHubIdAndIsDeletedFalse(hubId)
                 .orElseThrow(() -> new HubException(ErrorCode.NOT_FOUND_HUB));
 
-        //hub.delete();
+        hub.delete(userId);
     }
 
     // 허브 존재 여부 확인

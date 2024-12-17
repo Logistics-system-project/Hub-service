@@ -14,4 +14,5 @@ public interface HubMovementRepository {
     HubMovement save(HubMovement hubMovement);
     Page<HubMovement> findByKeyword(String keyword, Pageable pageable);
     Optional<HubMovement> findByHubMovementIdAndIsDeletedFalse (UUID hubMovementId);
+    Optional<HubMovement> findByDepartureHub_HubIdAndArrivalHub_HubId(UUID departureHubId, UUID arrivalHubId);
 }

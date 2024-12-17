@@ -1,16 +1,19 @@
 package com.spring.dozen.hub.presentation.controller;
 
+import com.spring.dozen.hub.application.annotation.RequireRole;
 import com.spring.dozen.hub.application.dto.response.*;
 import com.spring.dozen.hub.application.service.HubMovementService;
 import com.spring.dozen.hub.presentation.dto.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.SortDefault;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -22,8 +25,8 @@ public class HubMovementController {
     private final HubMovementService hubMovementService;
 
     // 허브 이동정보 생성
-    // 권한 추가 예정 : MASTER 관리자 권한만
     @PostMapping
+    @RequireRole({"MASTER"})
     public ApiResponse<HubMovementResponse> createHubMovement(@RequestBody HubMovementCreateRequest request) {
         HubMovementResponse response = hubMovementService.createHubMovement(request.toDTO());
         return ApiResponse.success(response);
@@ -38,7 +41,7 @@ public class HubMovementController {
             ) Pageable pageable,
             @RequestParam(required = false) String keyword
     ) {
-        Page<HubMovementListResponse> hubMovementPage = hubMovementService.getHubMovementList(pageable, keyword);
+        Page<HubMovementListResponse> hubMovementPage = hubMovementService.getHubMovementList(keyword, pageable);
 
         return PageResponse.success(
                 hubMovementPage.getTotalPages(),
@@ -56,6 +59,7 @@ public class HubMovementController {
 
     // 허브 이동정보 수정
     @PutMapping("/{hubMovementId}")
+    @RequireRole({"MASTER"})
     public ApiResponse<HubMovementDetailResponse> updateHubMovement(@PathVariable UUID hubMovementId,
                                                                     @RequestBody HubMovementUpdateRequest request) {
         HubMovementDetailResponse response = hubMovementService.updateHubMovement(hubMovementId, request.toDTO());;
@@ -64,10 +68,18 @@ public class HubMovementController {
 
     // 허브 이동정보 삭제
     @DeleteMapping("/{hubMovementId}")
+    @RequireRole({"MASTER"})
     public ApiResponse<Void> deleteHubMovement(
-            @PathVariable UUID hubMovementId
+            @PathVariable UUID hubMovementId,
+            @RequestHeader(value = "X-User-Id", required = true)  String userId
     ){
-        hubMovementService.deleteHubMovement(hubMovementId);
+        hubMovementService.deleteHubMovement(hubMovementId, userId);
         return ApiResponse.success();
+    }
+
+    // 허브 이동경로 조회
+    @GetMapping("/route")
+    public List<HubMovementRouteResponse> getRoute(@RequestParam UUID departureHubId, @RequestParam UUID arrivalHubId) {
+        return hubMovementService.getHubRoute(departureHubId, arrivalHubId);
     }
 }
